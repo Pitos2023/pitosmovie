@@ -5,14 +5,10 @@ import Card from './components/Card';
 import Modal from './components/Modal';
 import './App.css';
 
-// Helper function to preload images
-const preloadImage = (url) => {
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.href = url;
-  document.head.appendChild(link);
-};
+// API configuration
+const API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
+const API_URL = `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&page=1`;
+const SEARCH_API = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=`;
 
 const App = () => {
   const [movies, setMovies] = useState([]);
@@ -21,23 +17,19 @@ const App = () => {
   const [category, setCategory] = useState('movie');
 
   const fetchMovies = useCallback(async (term) => {
-    const response = await fetch(`https://omdbapi.com/?s=${term}&page=1&apikey=fc1fef96`);
+    const url = term ? `${SEARCH_API}${term}` : API_URL;
+    const response = await fetch(url);
     const data = await response.json();
 
-    if (data.Search) {
+    if (data.results) {
       const moviesWithRatings = await Promise.all(
-        data.Search.map(async (movie, index) => {
-          const movieDetails = await fetchMovieDetails(movie.imdbID);
+        data.results.map(async (movie, index) => {
+          const movieDetails = await fetchMovieDetails(movie.id);
           
-          // Preload the movie poster for above-the-fold movies (e.g., top 3 movies)
-          if (index < 3 && movieDetails.Poster && movieDetails.Poster !== 'N/A') {
-            preloadImage(movieDetails.Poster);
-          }
-
           return {
             ...movie,
-            imdbRating: movieDetails.imdbRating,
-            Poster: movieDetails.Poster,
+            imdbRating: movieDetails.vote_average, // TMDb uses `vote_average`
+            Poster: movieDetails.poster_path ? `https://image.tmdb.org/t/p/w500${movieDetails.poster_path}` : 'placeholder.jpg',
           };
         })
       );
@@ -46,7 +38,7 @@ const App = () => {
   }, []);
 
   const fetchMovieDetails = async (id) => {
-    const response = await fetch(`https://omdbapi.com/?i=${id}&apikey=fc1fef96`);
+    const response = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`);
     const data = await response.json();
     return data;
   };
@@ -57,7 +49,7 @@ const App = () => {
   };
 
   const openModal = (movie) => {
-    fetchMovieDetails(movie.imdbID).then((data) => setSelectedMovie(data));
+    fetchMovieDetails(movie.id).then((data) => setSelectedMovie(data));
   };
 
   const closeModal = () => {
@@ -85,7 +77,7 @@ const App = () => {
           {movies &&
             movies.map((movie, index) => (
               <Card
-                key={movie.imdbID}
+                key={movie.id}
                 movie={movie}
                 openModal={openModal}
                 imageWidth={150}

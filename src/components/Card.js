@@ -5,14 +5,14 @@ const Card = ({ movie, openModal, imageWidth, imageHeight, eagerLoad }) => {
     <div className="card" onClick={() => openModal(movie)}>
       <img
         src={movie.Poster !== 'N/A' ? movie.Poster : 'placeholder.jpg'}
-        alt={movie.Title}
+        alt={movie.title}
         width={imageWidth}
         height={imageHeight}
         loading={eagerLoad ? 'eager' : 'lazy'}
       />
       <div className="card-info">
-        <h3>{movie.Title}</h3>
-        <p>{movie.Year}</p>
+        <h3>{movie.title}</h3>
+        <p>{movie.release_date}</p>
         {movie.imdbRating && (
           <div className="rating">
             <span>⭐ {movie.imdbRating}</span>
