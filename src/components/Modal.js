@@ -1,24 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import ReactPlayer from 'react-player';
+import React from 'react';
 
 const Modal = ({ movie, closeModal }) => {
-  const [trailerUrl, setTrailerUrl] = useState('');
-
-  useEffect(() => {
-    const fetchTrailer = async () => {
-      const response = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=3fd2be6f0c70a2a598f084ddfb75487c`);
-      const data = await response.json();
-      const trailer = data.results.find(video => video.type === 'Trailer');
-      if (trailer) {
-        setTrailerUrl(`https://www.youtube.com/watch?v=${trailer.key}`);
-      }
-    };
-
-    if (movie) {
-      fetchTrailer();
-    }
-  }, [movie]);
-
   if (!movie) return null;
 
   return (
@@ -26,11 +8,13 @@ const Modal = ({ movie, closeModal }) => {
       <div className="modal-content">
         <span className="close" onClick={closeModal}>&times;</span>
         <h2>{movie.title}</h2>
-        {trailerUrl ? (
-          <ReactPlayer url={trailerUrl} controls={true} width="100%" height="400px" />
-        ) : (
-          <p>Trailer not available</p>
+        {movie.Poster && (
+          <img 
+            src={movie.Poster ? `https://image.tmdb.org/t/p/w500${movie.Poster}` : 'placeholder.jpg'} 
+            alt={`${movie.title} poster`} 
+          />
         )}
+        <p><strong>Description:</strong> {movie.overview}</p>
         <p><strong>Release Date:</strong> {movie.release_date}</p>
         <p><strong>Genres:</strong> {movie.genres.map(genre => genre.name).join(', ')}</p>
         <p><strong>Vote Average:</strong> {movie.vote_average}</p>

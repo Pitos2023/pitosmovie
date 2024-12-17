@@ -5,7 +5,7 @@ import Card from './components/Card';
 import Modal from './components/Modal';
 import './App.css';
 
-// API configuration
+
 const API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
 const API_URL = `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}&page=1`;
 const SEARCH_API = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=`;
@@ -23,12 +23,12 @@ const App = () => {
 
     if (data.results) {
       const moviesWithRatings = await Promise.all(
-        data.results.map(async (movie, index) => {
+        data.results.map(async (movie) => {
           const movieDetails = await fetchMovieDetails(movie.id);
           
           return {
             ...movie,
-            imdbRating: movieDetails.vote_average, // TMDb uses `vote_average`
+            imdbRating: movieDetails.vote_average,
             Poster: movieDetails.poster_path ? `https://image.tmdb.org/t/p/w500${movieDetails.poster_path}` : 'placeholder.jpg',
           };
         })
@@ -80,9 +80,7 @@ const App = () => {
                 key={movie.id}
                 movie={movie}
                 openModal={openModal}
-                imageWidth={150}
-                imageHeight={225}
-                eagerLoad={index < 3} // Eagerly load top 3 images
+                eagerLoad={index < 3}
               />
             ))}
         </div>
